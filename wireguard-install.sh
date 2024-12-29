@@ -32,7 +32,13 @@ function checkVirt() {
 }
 
 function checkOS() {
+    # Load OS information
     source /etc/os-release
+
+    # Debugging: Display detected OS and version
+    echo "Detected OS: ${ID}"
+    echo "Detected Version: ${VERSION_ID}"
+
     OS="${ID}"
     
     if [[ ${OS} == "debian" || ${OS} == "raspbian" ]]; then
@@ -40,17 +46,18 @@ function checkOS() {
             echo "Your version of Debian (${VERSION_ID}) is not supported. Please use Debian 10 Buster or later."
             exit 1
         fi
-        OS=debian # overwrite if raspbian
-    
+        OS="debian"
+
     elif [[ ${OS} == "ubuntu" ]]; then
-        RELEASE_YEAR=$(echo "${VERSION_ID}" | cut -d'.' -f1)
         if [[ ${VERSION_ID} == "22.04" ]]; then
             echo "Ubuntu 22.04 (Jammy Jellyfish) detected and supported!"
-        elif [[ ${RELEASE_YEAR} -lt 18 ]]; then
+            return
+        elif [[ $(echo "${VERSION_ID}" | cut -d'.' -f1) -lt 18 ]]; then
             echo "Your version of Ubuntu (${VERSION_ID}) is not supported. Please use Ubuntu 18.04 or later."
             exit 1
         else
             echo "Your version of Ubuntu (${VERSION_ID}) is supported."
+            return
         fi
 
     elif [[ ${OS} == "fedora" ]]; then
@@ -66,18 +73,19 @@ function checkOS() {
         fi
 
     elif [[ -e /etc/oracle-release ]]; then
-        OS="oracle"
         echo "Oracle Linux detected. Proceeding..."
+        OS="oracle"
     
     elif [[ -e /etc/arch-release ]]; then
-        OS="arch"
         echo "Arch Linux detected. Proceeding..."
+        OS="arch"
 
     else
         echo "Looks like you aren't running this installer on a Debian, Ubuntu, Fedora, CentOS, AlmaLinux, Oracle, or Arch Linux system."
         exit 1
     fi
 }
+
 
 function getHomeDirForClient() {
 	local CLIENT_NAME=$1
