@@ -32,60 +32,51 @@ function checkVirt() {
 }
 
 function checkOS() {
-    # Load OS information
     source /etc/os-release
-
-    # Debugging: Display detected OS and version
-    echo "Detected OS: ${ID}"
-    echo "Detected Version: ${VERSION_ID}"
+    echo "OS Release File Dump:"
+    cat /etc/os-release
+    echo "Detected ID: ${ID}"
+    echo "Detected VERSION_ID: ${VERSION_ID}"
 
     OS="${ID}"
-    
     if [[ ${OS} == "debian" || ${OS} == "raspbian" ]]; then
         if [[ ${VERSION_ID} -lt 10 ]]; then
             echo "Your version of Debian (${VERSION_ID}) is not supported. Please use Debian 10 Buster or later."
             exit 1
         fi
         OS="debian"
-
-    elif [[ ${OS} == "ubuntu" ]]; then
+    elif [[ ${OS} == "ubuntu" || ${OS} == "pop" ]]; then
         if [[ ${VERSION_ID} == "22.04" ]]; then
-            echo "Ubuntu 22.04 (Jammy Jellyfish) detected and supported!"
+            echo "Ubuntu 22.04 (Jammy Jellyfish) or Pop!_OS 22.04 detected and supported!"
             return
         elif [[ $(echo "${VERSION_ID}" | cut -d'.' -f1) -lt 18 ]]; then
-            echo "Your version of Ubuntu (${VERSION_ID}) is not supported. Please use Ubuntu 18.04 or later."
+            echo "Your version of Ubuntu (${VERSION_ID}) or Pop!_OS (${VERSION_ID}) is not supported. Please use version 18.04 or later."
             exit 1
         else
-            echo "Your version of Ubuntu (${VERSION_ID}) is supported."
+            echo "Your version of Ubuntu (${VERSION_ID}) or Pop!_OS (${VERSION_ID}) is supported."
             return
         fi
-
     elif [[ ${OS} == "fedora" ]]; then
         if [[ ${VERSION_ID} -lt 32 ]]; then
             echo "Your version of Fedora (${VERSION_ID}) is not supported. Please use Fedora 32 or later."
             exit 1
         fi
-
     elif [[ ${OS} == "centos" || ${OS} == "almalinux" || ${OS} == "rocky" ]]; then
         if [[ ${VERSION_ID} == 7* ]]; then
             echo "Your version of CentOS (${VERSION_ID}) is not supported. Please use CentOS 8 or later."
             exit 1
         fi
-
     elif [[ -e /etc/oracle-release ]]; then
         echo "Oracle Linux detected. Proceeding..."
         OS="oracle"
-    
     elif [[ -e /etc/arch-release ]]; then
         echo "Arch Linux detected. Proceeding..."
         OS="arch"
-
     else
-        echo "Looks like you aren't running this installer on a Debian, Ubuntu, Fedora, CentOS, AlmaLinux, Oracle, or Arch Linux system."
+        echo "Looks like you aren't running this installer on a Debian, Ubuntu, Pop!_OS, Fedora, CentOS, AlmaLinux, Oracle, or Arch Linux system."
         exit 1
     fi
 }
-
 
 function getHomeDirForClient() {
 	local CLIENT_NAME=$1
